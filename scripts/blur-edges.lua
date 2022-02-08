@@ -6,7 +6,7 @@ local opts = {
     minimum_black_bar_size = 3,
     mode = "all",
     active = true,
-    reapply_delay = 1/60,
+    reapply_delay = 1/30,
     watch_later_fix = false,
     only_fullscreen = true,
 }
