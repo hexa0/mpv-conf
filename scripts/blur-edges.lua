@@ -1,9 +1,11 @@
+-- https://github.com/occivink/mpv-scripts/blob/master/scripts/blur-edges.lua
+
 local options = require 'mp.options'
 
 local opts = {
     blur_radius = 25,
     blur_power = 2,
-    minimum_black_bar_size = 3,
+    minimum_black_bar_size = 0,
     mode = "all",
     active = true,
     reapply_delay = 1/30,
@@ -41,7 +43,7 @@ function set_blur()
     local video_aspect = mp.get_property_number("video-aspect")
     local ww, wh = mp.get_osd_size()
 
-    if math.abs(ww/wh - video_aspect) < 0.05 then return end
+    if math.abs(ww/wh - video_aspect) < 0.01 then return end
     if opts.mode == "horizontal" and ww/wh < video_aspect then return end
     if opts.mode == "vertical" and ww/wh > video_aspect then return end
 
