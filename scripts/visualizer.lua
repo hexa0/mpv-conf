@@ -180,9 +180,9 @@ local function get_visualizer(name, quality, vtrack, albumart)
 
 	if was_enabled then
 		if name ~= "off" then
-			mp.osd_message(OSDTX_FORMAT_SWITCH:format(name), 10)
+			mp.osd_message(OSDTX_FORMAT_SWITCH:format(name), 1)
 		else
-			mp.osd_message(OSDTX_FORMAT_OFF:format(name), 10)
+			mp.osd_message(OSDTX_FORMAT_OFF:format(name), 1)
 		end
 	end
 
