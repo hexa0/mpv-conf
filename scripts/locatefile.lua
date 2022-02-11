@@ -1,3 +1,5 @@
+-- https://github.com/nimatrueway/mpv-locatefile-lua-script
+
 -- DEBUGGING
 --
 -- Debug messages will be printed to stdout with mpv command line option
