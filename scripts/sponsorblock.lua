@@ -1,3 +1,5 @@
+-- https://github.com/po5/mpv_sponsorblock
+
 -- sponsorblock.lua
 --
 -- This script skips sponsored segments of YouTube videos

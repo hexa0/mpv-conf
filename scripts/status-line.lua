@@ -1,3 +1,5 @@
+-- https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/status-line.lua
+
 -- Rebuild the terminal status line as a lua script
 -- Be aware that this will require more cpu power!
 -- Also, this is based on a rather old version of the

@@ -1,3 +1,5 @@
+-- https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/autocrop.lua
+
 --[[
 This script uses the lavfi cropdetect filter to automatically
 insert a crop filter with appropriate parameters for the

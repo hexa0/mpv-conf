@@ -1,3 +1,5 @@
+-- https://github.com/CogentRedTester/mpv-search-page
+
 --[[
     For the full documentation see: https://github.com/CogentRedTester/mpv-search-page
 

@@ -1,3 +1,5 @@
+-- https://github.com/CogentRedTester/mpv-user-input
+
 local mp = require 'mp'
 local msg = require 'mp.msg'
 local utils = require 'mp.utils'
