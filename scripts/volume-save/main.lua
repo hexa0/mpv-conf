@@ -16,7 +16,7 @@ local function loadVolume()
 end
 
 local function saveVolume()
-	local volumeSave  = io.open(OUT_PATH, "w")
+	local volumeSave = io.open(OUT_PATH, "w")
 	volumeSave:write(tostring(mp.get_property("volume")))
 	volumeSave:close()
 end
