@@ -6,7 +6,7 @@ end
 
 function openURL()
    
-   subprocess = {
+   local subprocess = {
       name = "subprocess",
       args = { "powershell", "-Command", "Get-Clipboard", "-Raw" },
       playback_only = false,
@@ -16,7 +16,7 @@ function openURL()
    
    mp.osd_message("Getting URL from clipboard...")
    
-   r = mp.command_native(subprocess)
+   local r = mp.command_native(subprocess)
    
    --failed getting clipboard data for some reason
    if r.status < 0 then

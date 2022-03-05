@@ -172,15 +172,15 @@ function create_chapter(chapter_title, chapter_time)
 end
 
 function process(uuid, t, new_ranges)
-    start_time = tonumber(string.match(t, "[^,]+"))
-    end_time = tonumber(string.sub(string.match(t, ",[^,]+"), 2))
+    local start_time = tonumber(string.match(t, "[^,]+"))
+    local end_time = tonumber(string.sub(string.match(t, ",[^,]+"), 2))
     for o_uuid, o_t in pairs(ranges) do
         if (start_time >= o_t.start_time and start_time <= o_t.end_time) or (o_t.start_time >= start_time and o_t.start_time <= end_time) then
             new_ranges[o_uuid] = o_t
             return
         end
     end
-    category = string.match(t, "[^,]+$")
+    local category = string.match(t, "[^,]+$")
     if categories[category] and end_time - start_time >= options.min_duration then
         new_ranges[uuid] = {
             start_time = start_time,
@@ -240,7 +240,7 @@ function getranges(_, exists, db, more)
     local r_count = 0
     if more then r_count = -1 end
     for t in string.gmatch(sponsors.stdout, "[^:%s]+") do
-        uuid = string.match(t, "([^,]+),[^,]+$")
+        local uuid = string.match(t, "([^,]+),[^,]+$")
         if ranges[uuid] then
             new_ranges[uuid] = ranges[uuid]
         else
@@ -402,7 +402,7 @@ function file_loaded()
     end
     youtube_id = youtube_id or string.match(video_path, options.local_pattern)
     
-    if not youtube_id or string.len(youtube_id) < 11 or (local_pattern and string.len(youtube_id) ~= 11) then return end
+    if not youtube_id or string.len(youtube_id) < 11 or (options.local_pattern and string.len(youtube_id) ~= 11) then return end
     youtube_id = string.sub(youtube_id, 1, 11)
     mp.msg.debug("Found YouTube ID: " .. youtube_id)
     init = true

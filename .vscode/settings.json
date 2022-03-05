@@ -1,0 +1,9 @@
+{
+	"robloxLsp.diagnostics.globals": [
+		"mp",
+		"io",
+		"jit",
+		"read_options",
+		"package"
+	]
+}

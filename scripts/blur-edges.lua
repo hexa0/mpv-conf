@@ -99,13 +99,13 @@ function set_blur()
     local blur = string.format("boxblur=lr=%i:lp=%i:cr=%i:cp=%i",
         lr, opts.blur_power, cr, opts.blur_power)
 
-    zone_1 = string.format("[a] %s,%s [a_fin]", cropped_scaled_1, blur)
-    zone_2 = string.format("[b] %s,%s [b_fin]", cropped_scaled_2, blur)
+    local zone_1 = string.format("[a] %s,%s [a_fin]", cropped_scaled_1, blur)
+    local zone_2 = string.format("[b] %s,%s [b_fin]", cropped_scaled_2, blur)
 
     local par_fix = "setsar=ratio=" .. tostring(par) .. ":max=10000"
 
-    stack = string.format("[a_fin] [v] [b_fin] %sstack=3,%s [vo]", stack_direction, par_fix)
-    filter = string.format("%s;%s;%s;%s", split, zone_1, zone_2, stack)
+    local stack = string.format("[a_fin] [v] [b_fin] %sstack=3,%s [vo]", stack_direction, par_fix)
+    local filter = string.format("%s;%s;%s;%s", split, zone_1, zone_2, stack)
     set_lavfi_complex(filter)
     applied = true
 end
