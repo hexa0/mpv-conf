@@ -3,7 +3,7 @@
 
 local OUT_PATH = ("%s/.volsave"):format(mp.get_script_directory())
 
-mp.register_event("file-loaded", function()
+local function loadVolume()
 	local success, volumeSaveError = pcall(function()
 		local volumeSave = io.open(OUT_PATH, "r")
 		local volumeSaveData = volumeSave:read("*a")
@@ -13,10 +13,13 @@ mp.register_event("file-loaded", function()
 	if not success then -- something fucked up, probably didn't have a .volsave yet
 		print("[warn]", volumeSaveError)
 	end
-end)
+end
 
-mp.register_event("shutdown", function()
+local function saveVolume()
 	local volumeSave  = io.open(OUT_PATH, "w")
 	volumeSave:write(tostring(mp.get_property("volume")))
 	volumeSave:close()
-end)
+end
+
+mp.register_event("shutdown", saveVolume)
+loadVolume()
