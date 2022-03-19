@@ -8,4 +8,5 @@ most of these scripts aren't made by me although i may have modified a lot of th
 * **ctrl + v** | _attempts to open the url from the clipboard_
 * **alt + o** | _locates the current file_
 * **f12** | _search for keybinds_
-* **scroll wheel** | change volume
+* **scroll wheel** | _change volume_
+* **k** | _take a cropped screenshot_
