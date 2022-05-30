@@ -2975,6 +2975,46 @@ function validate_user_opts()
     end
 end
 
+local last_seek = os.clock()
+local last_seek_between_times = {}
+
+local function add_seek_between_time(n)
+	if n < 1/5 then
+		table.insert(last_seek_between_times, n)
+		if #last_seek_between_times > 30 then
+			table.remove(last_seek_between_times, 1)
+		end
+	end
+end
+
+local function get_seek_fps()
+	if #last_seek_between_times < 10 then
+		return 1/15
+	else
+		local min_between = math.huge
+		for _, v in pairs(last_seek_between_times) do
+			if v < min_between then
+				min_between = v
+			end
+		end
+		local valid = {}
+		for _, v in pairs(last_seek_between_times) do
+			if v < min_between * 1.5 or true then
+				table.insert(valid, v)
+			end
+		end
+		if #valid == 0 then
+			return 1/15
+		else
+			local avg = 0
+			for _, v in pairs(valid) do
+				avg = avg + (v/#valid)
+			end
+			print(1 / avg)
+			return avg * 0.85
+		end
+	end
+end
 
 -- OSC INIT
 function osc_init()
@@ -3095,11 +3135,11 @@ function osc_init()
     ne.softrepeat = true
     ne.content = "\238\128\132"
     ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", -5, "relative", "keyframes") end
+        function () mp.commandv("seek", -5, "relative", "exact") end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () mp.commandv("frame-back-step") end
     ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", -30, "relative", "keyframes") end
+        function () mp.commandv("seek", -30, "relative", "exact") end
 
     --skipfrwd
     ne = new_element("skipfrwd", "button")
@@ -3107,11 +3147,11 @@ function osc_init()
     ne.softrepeat = true
     ne.content = "\238\128\133"
     ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", 10, "relative", "keyframes") end
+        function () mp.commandv("seek", 10, "relative", "exact") end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () mp.commandv("frame-step") end
     ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", 60, "relative", "keyframes") end
+        function () mp.commandv("seek", 60, "relative", "exact") end
 
     --ch_prev
     ne = new_element("ch_prev", "button")
@@ -3250,11 +3290,13 @@ function osc_init()
             -- sent when the user is done seeking, so we need to throw away
             -- identical seeks
             local seekto = get_slider_value(element)
-            if (element.state.lastseek == nil) or
-                (not (element.state.lastseek == seekto)) then
-                    mp.commandv("seek", seekto,
-                        "absolute-percent", "keyframes")
+            if (element.state.lastseek == nil) or (not (element.state.lastseek == seekto)) then
+				if os.clock() - last_seek >= get_seek_fps() then
+                    mp.commandv("seek", seekto, "absolute-percent", "exact")
+					add_seek_between_time(os.clock() - last_seek)
+					last_seek = os.clock()
                     element.state.lastseek = seekto
+				end
             end
 
         end

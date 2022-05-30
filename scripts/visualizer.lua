@@ -147,6 +147,16 @@ local was_enabled = false -- track whether we've actually changed the visualizer
 local OSDTX_FORMAT_SWITCH = "Switched visualizer to %s"
 local OSDTX_FORMAT_OFF = "Disabled audio visualizer"
 
+function math.clamp(n, min, max)
+	if n < min then
+		return min
+	elseif n > max then
+		return max
+	else
+		return n
+	end
+end
+
 local function get_visualizer(name, quality, vtrack, albumart)
     local w, h, fps
 
@@ -168,7 +178,7 @@ local function get_visualizer(name, quality, vtrack, albumart)
 	elseif quality == "hexa" then -- my settings for my display
 		w = 2560
 		h = 1440
-		fps = 165
+		fps = 60
     else
         msg.log("error", "invalid quality")
         return ""
@@ -187,6 +197,16 @@ local function get_visualizer(name, quality, vtrack, albumart)
 	end
 
 	was_enabled = true
+
+	local audio_params = mp.get_property_native("audio-params") or mp.get_property_native("audio-out-params") or { samplerate = 48000 }
+	-- in case of e.g. lavfi-complex there can be no input audio, only output
+	if not audio_params then
+		audio_params = mp.get_property_native("audio-out-params")
+	end
+
+	local video_params = mp.get_property_native("video-params") or mp.get_property_native("video-out-params") or {}
+
+	local display_fps = mp.get_property_number("display-fps", 0) or 60
 
     if name == "showcqt" then
         local count = math.ceil(w * 180 / 1920 / fps)
@@ -218,7 +238,7 @@ local function get_visualizer(name, quality, vtrack, albumart)
                 "sample_rates   = 384000," ..
             "avectorscope       =" ..
                 "size           =" .. w .. "x" .. h .. ":" ..
-                "r              =" .. fps .. ":" ..
+                "r              =" .. display_fps .. ":" ..
 				"mirror=y" .. ":" ..
 				"draw=line" .. ":" ..
 				"rf=100:bf=100:gf=100" .. ":" ..
@@ -227,11 +247,12 @@ local function get_visualizer(name, quality, vtrack, albumart)
 
 
     elseif name == "showspectrum" then
+		local height = math.clamp(audio_params["samplerate"] / 128, 10, 48000 / 128)
         return "[aid1] asplit [ao]," ..
             "afifo," ..
             "showspectrum       =" ..
-                "size           =" .. w / 2 .. "x" .. h / 2 .. ":" ..
-                "win_func       = blackman [vo]"
+				"mode=combined:color=rainbow:saturation=2:gain=0.2:fscale=lin:win_func=parzen:legend=1:drange=120:slide=scroll:fps=" .. display_fps .. ":" ..
+                "size           =" .. math.floor(height * (w/h)) .. "x" .. math.floor(height) .. ":[vo]"
 
 
     elseif name == "showcqtbar" then
@@ -240,7 +261,7 @@ local function get_visualizer(name, quality, vtrack, albumart)
         return "[aid1] asplit [ao]," ..
             "afifo, aformat     = channel_layouts = stereo," ..
             "showcqt            =" ..
-                "fps            =" .. fps .. ":" ..
+                "fps            =" .. display_fps .. ":" ..
                 "size           =" .. w .. "x" .. (h + axis_h)/2 .. ":" ..
                 "count          = 1:" ..
                 "csp            = bt709:" ..
@@ -266,11 +287,12 @@ local function get_visualizer(name, quality, vtrack, albumart)
 
 
     elseif name == "showwaves" then
+		local width = audio_params["samplerate"] * (1/display_fps)
         return "[aid1] asplit [ao]," ..
             "afifo," ..
             "showwaves          =" ..
-                "size           =" .. w .. "x" .. h .. ":" ..
-                "r              =" .. fps .. ":" ..
+                "size           =" .. math.floor(width) .. "x" .. math.floor(width * (h/w)) .. ":" ..
+                "r              =" .. display_fps .. ":" ..
                 "mode           = p2p," ..
             "format             = rgb0 [vo]"
     elseif name == "off" then
