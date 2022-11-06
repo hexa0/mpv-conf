@@ -8,9 +8,6 @@ require 'mp.msg'
 WINDOWS = 2
 UNIX = 3
 
-MINUTE = 60
-HOUR = 60 * 60
-
 local function platform_type()
     local utils = require 'mp.utils'
     local workdir = utils.to_string(mp.get_property_native("working-directory"))
@@ -58,11 +55,10 @@ end
 
 local function copyTime()
     local time_pos = mp.get_property_number("time-pos")
-	print(time_pos)
-	local hours = time_pos / HOUR
-	local minutes = (time_pos / MINUTE) % MINUTE
-	local seconds = time_pos % MINUTE
-	local milliseconds = (time_pos % 1) * 1000
+    local hours = time_pos / 3600
+    local minutes = (time_pos / 60) % 60
+    local seconds = time_pos % 60
+    local milliseconds = (time_pos % 1) * 1000
     local time = string.format("%02d:%02d:%02d.%03d", math.floor(hours), math.floor(minutes), math.floor(seconds), milliseconds)
     if set_clipboard(time) then
         mp.osd_message(string.format("Copied to Clipboard: %s", time))
