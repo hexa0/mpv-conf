@@ -1,3 +1,5 @@
+-- https://github.com/marzzzello/mpv_thumbnail_script
+
 --[[
     Copyright (C) 2017 AMM
 
