@@ -212,7 +212,7 @@ local function get_visualizer(name, quality, vtrack, albumart)
         local count = math.ceil(w * 180 / 1920 / fps)
 
         return "[aid1] asplit [ao]," ..
-            "afifo, aformat     = channel_layouts = stereo," ..
+            "aformat     = channel_layouts = stereo," ..
             "showcqt            =" ..
                 "fps            =" .. fps .. ":" ..
                 "size           =" .. w .. "x" .. h .. ":" ..
@@ -233,7 +233,6 @@ local function get_visualizer(name, quality, vtrack, albumart)
 
     elseif name == "avectorscope" then
         return "[aid1] asplit [ao]," ..
-            "afifo," ..
             "aformat            =" ..
                 "sample_rates   = 384000," ..
             "avectorscope       =" ..
@@ -249,7 +248,6 @@ local function get_visualizer(name, quality, vtrack, albumart)
     elseif name == "showspectrum" then
 		local height = math.clamp(audio_params["samplerate"] / 128, 10, 48000 / 128)
         return "[aid1] asplit [ao]," ..
-            "afifo," ..
             "showspectrum       =" ..
 				"mode=combined:color=rainbow:saturation=2:gain=0.2:fscale=lin:win_func=parzen:legend=1:drange=120:slide=scroll:fps=" .. display_fps .. ":" ..
                 "size           =" .. math.floor(height * (w/h)) .. "x" .. math.floor(height) .. ":[vo]"
@@ -259,7 +257,7 @@ local function get_visualizer(name, quality, vtrack, albumart)
         local axis_h = math.ceil(w * 12 / 1920) * 4
 
         return "[aid1] asplit [ao]," ..
-            "afifo, aformat     = channel_layouts = stereo," ..
+            "aformat     = channel_layouts = stereo," ..
             "showcqt            =" ..
                 "fps            =" .. display_fps .. ":" ..
                 "size           =" .. w .. "x" .. (h + axis_h)/2 .. ":" ..
@@ -289,7 +287,6 @@ local function get_visualizer(name, quality, vtrack, albumart)
     elseif name == "showwaves" then
 		local width = audio_params["samplerate"] * (1/display_fps)
         return "[aid1] asplit [ao]," ..
-            "afifo," ..
             "showwaves          =" ..
                 "size           =" .. math.floor(width) .. "x" .. math.floor(width * (h/w)) .. ":" ..
                 "r              =" .. display_fps .. ":" ..
