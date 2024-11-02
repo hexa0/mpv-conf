@@ -10,3 +10,5 @@ most of these scripts aren't made by me although i may have modified a lot of th
 * **f12** | _search for keybinds_
 * **scroll wheel** | _change volume_
 * **k** | _take a cropped screenshot_
+* **shift + 3** | _switch audio track_
+* **ctrl + 3** | _switch audio track merge mode_
