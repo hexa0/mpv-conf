@@ -68,7 +68,7 @@ function switchMode()
 			end
 		end
 		
-		string = string .. "amix=inputs=" .. count .. "[ao]"
+		string = string .. "amix=inputs=" .. count .. "normalize=0[ao]"
 	end
 
 	print(string)
