@@ -1,3 +1,5 @@
+-- credits to knock for making me aware of being able to do this aswell as where she got the filter from: https://github.com/mpv-player/mpv/issues/6536#issuecomment-1966449338
+
 local modes = {
 	no = 1;
 	all = 2;
@@ -5,9 +7,9 @@ local modes = {
 }
 
 local modeStrings = {
-	"no";
-	"all";
-	"all but 3";
+	"No Merging";
+	"All";
+	"All (Excluding Track 3)"; -- used by me to exclude the unprocessed mic channel to prevent it from classing with the processed mic
 }
 
 local totalModes = 3
@@ -56,7 +58,7 @@ function switchMode()
 		end
 	end
 
-	local string = ""
+	local filter = ""
 	local enabledTracks = modeFunctions[mode](tracks)
 
 	if #enabledTracks > 0 then
@@ -64,16 +66,16 @@ function switchMode()
 		for i, enabled in pairs(enabledTracks) do
 			if enabled then
 				count = count + 1
-				string = string .. "[aid" .. tostring(i) .. "] "
+				filter = filter .. "[aid" .. tostring(i) .. "] "
 			end
 		end
 		
-		string = string .. "amix=inputs=" .. count .. ":normalize=0[ao]"
+		filter = filter .. "amix=inputs=" .. count .. ":normalize=0[ao]"
 	end
 
-	mp.set_property("options/lavfi-complex", string)
+	mp.set_property("options/lavfi-complex", filter)
 
-	mp.osd_message("audioMergeMode: " .. modeStrings[mode], 0.5)
+	mp.osd_message("Audio Merge Mode: " .. modeStrings[mode], 0.5)
 end
 
 mp.add_key_binding("ctrl+3", "switch-audio-mode", switchMode)
