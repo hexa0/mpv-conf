@@ -71,8 +71,6 @@ function switchMode()
 		string = string .. "amix=inputs=" .. count .. "normalize=0[ao]"
 	end
 
-	print(string)
-
 	mp.set_property("options/lavfi-complex", string)
 
 	mp.osd_message("audioMergeMode: " .. modeStrings[mode], 0.5)
