@@ -1,4 +1,5 @@
 -- credits to knock for making me aware of being able to do this aswell as where she got the filter from: https://github.com/mpv-player/mpv/issues/6536#issuecomment-1966449338
+-- however this entire script was written by me (hexa)
 
 local modes = {
 	no = 1;
