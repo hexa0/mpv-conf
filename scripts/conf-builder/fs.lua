@@ -86,14 +86,14 @@ function hfs.CacheFetch()
 	cachedIndex = {}
 
 	if platform:IsInRange(platform.OS_RANGES.NT) then
-		local command = ([[%s/index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "\\ "), MPV_DIR)
+		local command = ([[%s/index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "^ "), MPV_DIR)
 		print(command)
 		local cachedIndexHandle = io.popen(command)
 		local current = "unknown"
 		-- local did = 0
 		-- local lines = 0
 	
-		for line in cachedIndexHandle:lines() do
+		for line in cachedIndexHandle:lines() do``
 			if line:sub(1, 7) == ";BEGIN " then
 				current = line:sub(8)
 				-- did = did + 1
