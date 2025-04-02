@@ -127,6 +127,10 @@ function hfs.CacheFetch()
 				print(line)
 			end
 			if line:sub(1, 7) == ";BEGIN " then
+				if not cachedIndex[current] then
+					cachedIndex[current] = {}
+				end
+				
 				current = line:sub(8)
 				did = did + 1
 				-- print(current)
