@@ -107,6 +107,9 @@ function hfs.CacheFetch()
 
 	if platform:IsInRange(platform.OS_RANGES.NT) then
 		local command = ([[%s\index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "^ "), MPV_DIR)
+		if DEBUG_MODE then
+			print("running", command, "to cache directories")
+		end
 		local cachedIndexHandle = io.popen(command)
 		local current = "unknown"
 		local did = 0
