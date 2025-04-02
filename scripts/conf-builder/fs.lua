@@ -3,12 +3,14 @@ local platform = require("platform")
 
 local hfs = {}
 
+local DEBUG_MODE = true
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
+local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
 
 if platform:IsInRange(platform.OS_RANGES.NT) then
-	MPV_DIR = "%appdata%\\mpv\\"
-	SCRIPT_DIR = MPV_DIR .. "scripts\\conf-builder\\"
+	MPV_DIR = "%appdata%\\mpv"
+	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
 end
 
 hfs.IO_MODE = {
@@ -24,6 +26,7 @@ hfs.IO_MODE = {
 function hfs.FileExists(path)
 	if platform:IsInRange(platform.OS_RANGES.NT) then
 		path = path:gsub("\\", "/")
+		path = path:gsub("%%appdata%%", CONFIG_DIR .. "\\")
 	end
 
 	local file = io.open(path, hfs.IO_MODE.READ)
@@ -39,6 +42,7 @@ end
 function hfs.OpenFile(path, mode, compute)
 	if platform:IsInRange(platform.OS_RANGES.NT) then
 		path = path:gsub("\\", "/")
+		path = path:gsub("%%appdata%%", CONFIG_DIR .. "\\")
 	end
 	
 	local file, ioError, ioErrorID = io.open(path, mode)
@@ -85,36 +89,55 @@ local function HasItem(table, item)
 	return false
 end
 
+local function RecursivePrintOut(t, i)
+	for i2, v in pairs(t) do
+		if type(v) == "table" then
+			print(string.rep("    ", i), ('"%s":'):format(i2))
+			RecursivePrintOut(v, i + 1)
+		else
+			print(string.rep("    ", i), ('"%s": "%s"'):format(i2, v))
+		end
+	end
+end
+
 local cachedIndex = {}
 
 function hfs.CacheFetch()
 	cachedIndex = {}
 
 	if platform:IsInRange(platform.OS_RANGES.NT) then
-		local command = ([[%s/index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "^ "), MPV_DIR)
-		print(command)
+		local command = ([[%s\index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "^ "), MPV_DIR)
 		local cachedIndexHandle = io.popen(command)
 		local current = "unknown"
-		-- local did = 0
-		-- local lines = 0
+		local did = 0
+		local lines = 0
 	
 		for line in cachedIndexHandle:lines() do
+			-- print(line)
 			if line:sub(1, 7) == ";BEGIN " then
 				current = line:sub(8)
-				-- did = did + 1
+				did = did + 1
 				-- print(current)
 			else
 				cachedIndex[current] = cachedIndex[current] or {}
 				
 				if not HasItem(cachedIndex[current], line) then
+					lines = lines + 1
 					table.insert(cachedIndex[current], line)
 				end
 			end
 		end
 	
-		-- print("cached " .. did .. " directories and " .. lines - did .. " files for conf-builder.")
+		if DEBUG_MODE then
+			print("cached " .. did .. " directories and " .. lines - did .. " files for conf-builder.")
+		end
 	
 		cachedIndexHandle:close()
+	end
+
+	if DEBUG_MODE then
+		print("cachedIndex:")
+		RecursivePrintOut(cachedIndex, 1)
 	end
 end
 
@@ -124,7 +147,9 @@ function hfs.ListItemsInDirectory(path)
 	if cachedIndex[cachePath] then
 		return cachedIndex[cachePath]
 	else
-		error("cache miss on " .. cachePath)
+		if platform:IsInRange(platform.OS_RANGES.NT) then
+			error("cache miss on " .. cachePath)
+		end
 	end
 	
 	if platform:IsInRange(platform.OS_RANGES.NT) then

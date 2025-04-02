@@ -40,16 +40,16 @@ local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 
 if platform:IsInRange(platform.OS_RANGES.NT) then
-	MPV_DIR = "%appdata%\\mpv\\"
-	SCRIPT_DIR = MPV_DIR .. "scripts\\conf-builder\\"
+	MPV_DIR = "%appdata%\\mpv"
+	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
 end
 
 local OUT_MPV = ("%s/mpv.conf"):format(MPV_DIR)
 local OUT_INPUT = ("%s/input.conf"):format(MPV_DIR)
-local OUT_SCRIPTS = ("%s/script-opts/"):format(MPV_DIR)
-local IN_MPV = ("%s/conf/mpv/"):format(MPV_DIR)
-local IN_INPUT = ("%s/conf/input/"):format(MPV_DIR)
-local IN_SCRIPTS = ("%s/conf/script-opts/"):format(MPV_DIR)
+local OUT_SCRIPTS = ("%s/script-opts"):format(MPV_DIR)
+local IN_MPV = ("%s/conf/mpv"):format(MPV_DIR)
+local IN_INPUT = ("%s/conf/input"):format(MPV_DIR)
+local IN_SCRIPTS = ("%s/conf/script-opts"):format(MPV_DIR)
 
 local messageQueue = {}
 
@@ -108,7 +108,7 @@ local function BuildFullConfig(path)
 
 	local function CombineSource(source)
 		local list = {}
-		local sourcePath = path .. source
+		local sourcePath = path .. "/" .. source
 
 		ShowMessageImmediate("Building Config" .. "\n" .. sourcePath:sub(#MPV_DIR + 1) .. "\n" .. source)
 		for _, path in pairs(fs.ListItemsInDirectory(sourcePath)) do
@@ -137,8 +137,8 @@ local function BuildFullConfig(path)
 		return table.concat(list, "\n\n")
 	end
 
-	output = output .. "\n\n#builtin\n\n" .. CombineSource("builtin/")
-	output = output .. "\n\n#user\n\n" .. CombineSource("user/")
+	output = output .. "\n\n#builtin\n\n" .. CombineSource("builtin")
+	output = output .. "\n\n#user\n\n" .. CombineSource("user")
 
 	return output
 end
@@ -147,46 +147,42 @@ local function Build()
 	fs.CacheFetch()
 	ShowMessageImmediate("Building Config")
 
-	local passed = true
 	for _, path in pairs(fs.ListItemsInDirectory(OUT_SCRIPTS)) do
-		if path:match(".conf") then
+		if path:match(".conf") and not path:match(".bak") then
 			if not HeaderCheck(OUT_SCRIPTS .. path) then
-				passed = false
 				break
 			end
 		end
 	end
 
 	local restartNeeded
+	
+	local function DoFile(path, buildPath)
+		ShowMessageImmediate("Building Config" .. "\n" .. path:sub(#MPV_DIR + 1) .. "\n" .. buildPath:sub(#MPV_DIR + 1))
+		local built = BuildFullConfig(buildPath)
 
-	if passed then
-		local function DoFile(path, buildPath)
-			ShowMessageImmediate("Building Config" .. "\n" .. path:sub(#MPV_DIR + 1) .. "\n" .. buildPath:sub(#MPV_DIR + 1))
-			local built = BuildFullConfig(buildPath)
+		local exists = fs.FileExists(path)
 
-			local exists = fs.FileExists(path)
+		if exists then
+			fs.OpenFile(path, fs.IO_MODE.READ, function(file)
+				local content = file:read("*all")
 
-			if exists then
-				fs.OpenFile(path, fs.IO_MODE.READ, function(file)
-					local content = file:read("*all")
-
-					if content ~= built then
-						restartNeeded = (restartNeeded or "") .. path:sub(#MPV_DIR + 1) .. "\n"
-					end
-				end)
-			else
-				restartNeeded = (restartNeeded or "") .. path:sub(#MPV_DIR + 1) .. "\n"
-			end
-
-			fs.OpenFile(path, fs.IO_MODE.OVERWRITE, function(file)
-				file:write(built)
+				if content ~= built then
+					restartNeeded = (restartNeeded or "") .. path:sub(#MPV_DIR + 1) .. "\n"
+				end
 			end)
+		else
+			restartNeeded = (restartNeeded or "") .. path:sub(#MPV_DIR + 1) .. "\n"
 		end
-		DoFile(OUT_MPV, IN_MPV)
-		DoFile(OUT_INPUT, IN_INPUT)
-		for _, script in pairs(fs.ListItemsInDirectory(IN_SCRIPTS)) do
-			DoFile(OUT_SCRIPTS .. script .. ".conf", IN_SCRIPTS .. script .. "/")
-		end
+
+		fs.OpenFile(path, fs.IO_MODE.OVERWRITE, function(file)
+			file:write(built)
+		end)
+	end
+	DoFile(OUT_MPV, IN_MPV)
+	DoFile(OUT_INPUT, IN_INPUT)
+	for _, script in pairs(fs.ListItemsInDirectory(IN_SCRIPTS)) do
+		DoFile(OUT_SCRIPTS .. script .. ".conf", IN_SCRIPTS .. "/" .. script)
 	end
 
 	if restartNeeded then
