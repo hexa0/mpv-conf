@@ -93,7 +93,7 @@ function hfs.CacheFetch()
 		-- local did = 0
 		-- local lines = 0
 	
-		for line in cachedIndexHandle:lines() do``
+		for line in cachedIndexHandle:lines() do
 			if line:sub(1, 7) == ";BEGIN " then
 				current = line:sub(8)
 				-- did = did + 1
