@@ -6,4 +6,6 @@ input.conf
 mpv.conf.bak
 input.conf.bak
 conf/*/user/*.conf
-script-pots/*.conf
+conf/*/user/*.bak
+script-opts/*.conf
+script-opts/*.bak
