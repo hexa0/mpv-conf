@@ -28,9 +28,9 @@ local utils = require 'mp.utils'
 
 -- Determine the platform --
 
-ON_WINDOWS = (package.cpath:gmatch(".dll")() ~= nil)
-ON_MAC = (package.cpath:gmatch(".dylib")() ~= nil)
-ON_LINUX = (package.cpath:gmatch(".so")() ~= nil)
+ON_WINDOWS = package.cpath:match(".dll") ~= nil
+ON_MAC = package.cpath:match(".dylib") ~= nil
+ON_LINUX = package.cpath:match(".so") ~= nil
 
 -- Some helper functions needed to parse the options --
 function isempty(v) return not v or (v == "") or (v == 0) or (type(v) == "table" and not next(v)) end

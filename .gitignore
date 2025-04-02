@@ -1,3 +1,9 @@
 scripts/sponsorblock_shared/sponsorblock.txt
 .volsave
 watch_later
+mpv.conf
+input.conf
+mpv.conf.bak
+input.conf.bak
+conf/*/user/*.conf
+script-pots/*.conf
