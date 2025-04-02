@@ -6,6 +6,11 @@ local hfs = {}
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 
+if platform:IsInRange(platform.OS_RANGES.NT) then
+	MPV_DIR = "%appdata%\\mpv\\"
+	SCRIPT_DIR = MPV_DIR .. "scripts\\conf-builder\\"
+end
+
 hfs.IO_MODE = {
 	READ = "r";
 	WRITE = "w";
