@@ -1,14 +1,3 @@
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-echo "pad"
-
 echo ";BEGIN /script-opts"
 Get-ChildItem -Path ($args[0] + "/script-opts/") -Name
 
