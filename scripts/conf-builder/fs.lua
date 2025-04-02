@@ -4,6 +4,7 @@ local platform = require("platform")
 local hfs = {}
 
 local DEBUG_MODE = true
+local DEBUG_FORCE_DROP = true
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
@@ -106,7 +107,22 @@ function hfs.CacheFetch()
 	cachedIndex = {}
 
 	if platform:IsInRange(platform.OS_RANGES.NT) then
-		local command = ([[%s\index.bat "%s"]]):format(SCRIPT_DIR:gsub(" ", "^ "), MPV_DIR)
+		local command
+
+		-- user is evil and has spaces and breaks shit
+		if SCRIPT_DIR:match(" ") or DEBUG_FORCE_DROP then
+			-- we have to drop files because fuck lua
+			hfs.OpenFile(SCRIPT_DIR .. "/index.bat", hfs.IO_MODE.READ, function(existingScript)
+				hfs.OpenFile("C:\\ProgramData\\mpv_index_configs_temp.bat", hfs.IO_MODE.OVERWRITE, function(newFile)
+					newFile:write(existingScript:read("*all"))
+				end)
+			end)
+
+			command = ([[C:\ProgramData\mpv_index_configs_temp.bat "%s"]]):format(MPV_DIR)
+		else
+			command = ([[%s\index.bat "%s"]]):format(SCRIPT_DIR, MPV_DIR)
+		end
+
 		if DEBUG_MODE then
 			print("running", command, "to cache directories")
 		end
