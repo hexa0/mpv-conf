@@ -130,9 +130,15 @@ function hfs.CacheFetch()
 		local current = "unknown"
 		local did = 0
 		local lines = 0
+
+		if DEBUG_MODE then
+			print("output:")
+		end
 	
 		for line in cachedIndexHandle:lines() do
-			-- print(line)
+			if DEBUG_MODE then
+				print(line)
+			end
 			if line:sub(1, 7) == ";BEGIN " then
 				current = line:sub(8)
 				did = did + 1
@@ -145,6 +151,10 @@ function hfs.CacheFetch()
 					table.insert(cachedIndex[current], line)
 				end
 			end
+		end
+
+		if DEBUG_MODE then
+			print("end")
 		end
 	
 		if DEBUG_MODE then
