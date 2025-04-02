@@ -108,7 +108,7 @@ function hfs.CacheFetch()
 	if platform:IsInRange(platform.OS_RANGES.NT) then
 		local command
 
-		command = ([[powershell -file "%s\index.ps1" "%s"]]):format(SCRIPT_DIR, MPV_DIR)
+		command = ([[powershell -NoProfile -file "%s\index.ps1" "%s"]]):format(SCRIPT_DIR, MPV_DIR)
 
 		if DEBUG_MODE then
 			print("running", command, "to cache directories")

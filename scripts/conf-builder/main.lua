@@ -193,7 +193,7 @@ local function Build()
 
 			if path then
 				if timePosition then
-					for line in io.popen(([[powershell -file "%s/restart.ps1" "%s" "%s"]]):format(SCRIPT_DIR, path,  tonumber(timePosition) + 0.5)):lines() do
+					for line in io.popen(([[powershell -NoProfile -file "%s/restart.ps1" "%s" "%s"]]):format(SCRIPT_DIR, path,  tonumber(timePosition) + 0.5)):lines() do
 						print(line)
 					end
 				else
