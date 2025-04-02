@@ -186,7 +186,7 @@ local function Build()
 	end
 
 	if restartNeeded then
-		if platform:IsInRange(platform.OS_RANGES.NT) then
+		if platform:IsInRange(platform.OS_RANGES.NT) and false then
 			ShowMessageImmediate("Restarting")
 			local path = mp.get_property("path")
 			local timePosition = mp.get_property("time-pos")
