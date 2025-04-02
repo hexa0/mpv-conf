@@ -3,8 +3,8 @@ local platform = require("platform")
 
 local hfs = {}
 
-local DEBUG_MODE = true
-local DEBUG_FORCE_DROP = true
+local DEBUG_MODE = false
+local DEBUG_FORCE_DROP = false
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
