@@ -149,7 +149,7 @@ local function Build()
 
 	for _, path in pairs(fs.ListItemsInDirectory(OUT_SCRIPTS)) do
 		if path:match(".conf") and not path:match(".bak") then
-			if not HeaderCheck(OUT_SCRIPTS .. path) then
+			if not HeaderCheck(OUT_SCRIPTS .. "/" .. path) then
 				break
 			end
 		end
@@ -182,7 +182,7 @@ local function Build()
 	DoFile(OUT_MPV, IN_MPV)
 	DoFile(OUT_INPUT, IN_INPUT)
 	for _, script in pairs(fs.ListItemsInDirectory(IN_SCRIPTS)) do
-		DoFile(OUT_SCRIPTS .. script .. ".conf", IN_SCRIPTS .. "/" .. script)
+		DoFile(OUT_SCRIPTS .. "/" .. script .. ".conf", IN_SCRIPTS .. "/" .. script)
 	end
 
 	if restartNeeded then
