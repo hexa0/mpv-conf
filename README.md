@@ -34,3 +34,4 @@ if you're on linux you are probably not even going to need these install instruc
 * **k** | _take a cropped screenshot_
 * **shift + 3** | _switch audio track_
 * **ctrl + 3** | _switch audio track merge mode_
+* **shift + home** | _manually trigger a rebuild of the config_
