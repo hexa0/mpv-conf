@@ -22,7 +22,7 @@ and then run
 git clone https://github.com/hexa0/mpv-conf %USERPROFILE%\AppData\Roaming\mpv
 ```
 # installation (linux)
-install the latest version of MPV from your package manager and run
+install the latest version of MPV and git from your package manager and run
 ```bash
 git clone https://github.com/hexa0/mpv-conf ~/.config/mpv
 ```
