@@ -26,7 +26,6 @@ install the latest version of MPV and git from your package manager and run
 ```bash
 git clone https://github.com/hexa0/mpv-conf ~/.config/mpv
 ```
-this _should_ work however i haven't tested linux yet
 # installation (mac)
 i don't own a mac no clue, maybe try following some of the linux instructions
 
