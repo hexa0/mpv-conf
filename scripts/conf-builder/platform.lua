@@ -33,7 +33,7 @@ platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC do
 end
 
 function platformCheck:IsInRange(range)
-	return self.platform >= range[1] and self.platform <= range[1]
+	return self.platform >= range[1] and self.platform <= range[2]
 end
 
 return platformCheck
