@@ -204,6 +204,18 @@ local function Build()
 			end
 
 			os.exit()
+		elseif platform:IsInRange(platform.OS_RANGES.UNIX) then
+			ShowMessageImmediate("Restarting")
+			local path = mp.get_property("path")
+			local timePosition = mp.get_property("time-pos")
+
+			if timePosition then
+				io.popen(([[mpv "%s" --start=%s]]):format(path, timePosition))
+			else
+				io.popen(([[mpv "%s"]]):format(path))
+			end
+
+			os.exit()
 		else
 			MESSAGE_TIME = MESSAGE_TIME_LONG
 			QueueMessage(MESSAGES.RESTART_NEEDED:format(restartNeeded:sub(1, #restartNeeded - 1)))

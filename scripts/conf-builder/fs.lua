@@ -181,6 +181,8 @@ function hfs.ListItemsInDirectory(path)
 		handle:close()
 		return lines
 	elseif platform:IsInRange(platform.OS_RANGES.UNIX) then
+		-- on linux this isn't an issue since it doesn't load a whole terminal GUI like it does on windows
+		-- so we can safely skip caching it there!
 		local handle = io.popen(('ls -pa "%s" | grep -v /'):format(EscapeShellArgument(path)))
 		local lines = {}
 		for line in handle:lines() do
