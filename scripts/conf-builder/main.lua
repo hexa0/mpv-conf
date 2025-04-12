@@ -210,9 +210,9 @@ local function Build()
 			local timePosition = mp.get_property("time-pos")
 
 			if timePosition then
-				io.popen(([[mpv "%s" --start=%s]]):format(path, timePosition))
+				io.popen(([[nohup mpv "%s" --start=%s]]):format(path, timePosition))
 			else
-				io.popen(([[mpv "%s"]]):format(path))
+				io.popen(([[nohup mpv "%s"]]):format(path))
 			end
 
 			os.exit()
