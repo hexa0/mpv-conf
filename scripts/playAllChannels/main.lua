@@ -10,7 +10,7 @@ local modes = {
 local modeStrings = {
 	"No Merging";
 	"All";
-	"All (Excluding Track 3)"; -- used by me to exclude the unprocessed mic channel to prevent it from classing with the processed mic
+	"All (Excluding Track 3)"; -- used by me to exclude the unprocessed mic channel to prevent it from clashing with the processed mic
 }
 
 local totalModes = 3
