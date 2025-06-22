@@ -183,9 +183,13 @@ function hfs.ListItemsInDirectory(path)
 	elseif platform:IsInRange(platform.OS_RANGES.UNIX) then
 		-- on linux this isn't an issue since it doesn't load a whole terminal GUI like it does on windows
 		-- so we can safely skip caching it there!
-		local handle = io.popen(('ls -pa "%s" | grep -v /'):format(EscapeShellArgument(path)))
+		local handle = io.popen(('ls -pa "%s" | grep -v \\\\./'):format(EscapeShellArgument(path)))
 		local lines = {}
 		for line in handle:lines() do
+			if line:sub(#line) == "/" then
+				line = line:sub(1, #line - 1)
+			end
+
 			table.insert(lines, line)
 		end
 		handle:close()
