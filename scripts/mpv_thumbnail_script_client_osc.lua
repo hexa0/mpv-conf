@@ -1593,7 +1593,6 @@ function display_thumbnail(pos, value, ass)
 
             osc_thumb_state.visible = true
             if not (osc_thumb_state.last_path == thumb_path and osc_thumb_state.last_x == thumb_x and osc_thumb_state.last_y == thumb_y) then
-
                 local overlay_add_args = {
                     "overlay-add", osc_thumb_state.overlay_id,
                     thumb_x, thumb_y,
