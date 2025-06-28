@@ -26,6 +26,7 @@ install the latest version of MPV and git from your package manager and run
 ```bash
 git clone https://github.com/hexa0/mpv-conf ~/.config/mpv
 ```
+if you're on wayland you'll need to install [wl-clipboard](https://github.com/bugaevc/wl-clipboard) to be able to copy timestamps
 # installation (mac)
 i don't own a mac no clue, maybe try following some of the linux instructions
 
@@ -40,3 +41,4 @@ i don't own a mac no clue, maybe try following some of the linux instructions
 * **shift + 3** | _switch audio track_
 * **ctrl + 3** | _switch audio track merge mode_
 * **shift + home** | _manually trigger a rebuild of the config_
+* **shift + c** | _copies the current timestamp to the clipboard_

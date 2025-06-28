@@ -1530,6 +1530,14 @@ function display_thumbnail(pos, value, ass)
         ass:rect_cw(-pad.l, -pad.t, ass_w+pad.r, bg_h+pad.b)
         ass:draw_stop()
 
+        -- PATCHED BY HEXA, fix weird color issue on linux when using vo=wlshm
+        ass:new_event()
+        ass:pos(pos.x - (thumb_size.w / 4), bg_top + (display_progress and text_h or 0))
+        ass:append(("{\\bord0\\1c&H%s&\\1a&H%X&}"):format("000000", 0))
+        ass:draw_start()
+        ass:rect_cw(0, 0, thumb_size.w / 2, thumb_size.h / 2)
+        ass:draw_stop()
+
         if display_progress then
 
             ass:new_event()
