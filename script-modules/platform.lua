@@ -3,6 +3,7 @@ local platformCheck = {}
 platformCheck.OS_RANGES = {
 	NT = {0, 99};
 	UNIX = {100, 199};
+	LINUX = {110, 119};
 }
 
 platformCheck.PLATORMS = {
@@ -17,16 +18,21 @@ platformCheck.PLATORMS = {
 	-- UNIX-LIKE 100 - 199
 	UNIX_GENERIC = 100;
 	MAC = 101;
-	LINUX = 102;
+	LINUX_X11 = 110;
+	LINUX_WAYLAND = 111;
 	-- BSD = 103;
 }
 
 -- an unknown OS will be assumed to be UNIX_GENERIC
-platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC do
+platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC; do
 	if package.cpath:match(".dll") then -- Windows
 		platformCheck.platform = platformCheck.PLATORMS.WINDOWS
 	elseif package.cpath:match(".so") then -- Linux
-		platformCheck.platform = platformCheck.PLATORMS.LINUX
+		if os.getenv('WAYLAND_DISPLAY') then
+			platformCheck.platform = platformCheck.PLATORMS.LINUX_WAYLAND
+		else
+			platformCheck.platform = platformCheck.PLATORMS.LINUX_X11
+		end
 	elseif package.cpath:match(".dylib") then -- Mac
 		platformCheck.platform = platformCheck.PLATORMS.MAC
 	end
