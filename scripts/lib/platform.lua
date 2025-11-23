@@ -29,7 +29,7 @@ platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC; do
 		platformCheck.platform = platformCheck.PLATORMS.WINDOWS
 		print("mpv is running on windows (" .. platformCheck.platform .. ")")
 	elseif package.cpath:match(".so") then -- Linux
-		if os.getenv('WAYLAND_DISPLAY') then
+		if os.getenv("WAYLAND_DISPLAY") then
 			platformCheck.platform = platformCheck.PLATORMS.LINUX_WAYLAND
 			print("mpv is running on linux-wayland (" .. platformCheck.platform .. ")")
 		else

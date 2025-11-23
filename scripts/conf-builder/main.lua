@@ -3,6 +3,7 @@ package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..pack
 local mp = require("mp")
 local fs = require("fs")
 local platform = require("platform")
+local CommentDataCodec = require("commentDataCodec")
 
 local CONFIG_HEADER_01 = ([[
 # this file is being managed with conf-builder]])
@@ -19,16 +20,6 @@ local MESSAGES = {
 BACKED_UP = ([[
 you've made changes to %s before it was managed by conf-builder,
 the file has been backed up, restart mpv.]]);
-SORT_OUT_OF_ORDER = ([[
-your sort order is out of order.]]);
-SORT_DUPLICATION = ([[
-you have two files with the same sort number, please set an actual order to prevent unpredictable file ordering.
-suspect: %s]]);
-SORT_BAD_FORMAT = ([[
-you've omitted the sort order number from a config file (%s),
-please add x- before the file name and replace x with the desired order
-you cannot have two files with the same number, a higher number means it is applied last
-user config files will apply after built in ones]]);
 RESTART_NEEDED = ([[
 config file(s) has been updated and restarting mpv is required.
 changed files:
@@ -105,6 +96,32 @@ local function HeaderCheck(path)
 	return passed
 end
 
+local function PrintOutTableContent(t, ind)
+	if not ind then
+		ind = 1
+		print("printing the contents of " .. tostring(t))
+	end
+
+	for i, v in pairs(t) do
+		print(("%s[%s]: %s"):format(string.rep("    ", ind), tostring(i), tostring(v)))
+
+		if type(v) == "table" then
+			PrintOutTableContent(v, ind + 1)
+		end
+	end
+end
+
+local function SplitString(sourceString, delimiter)
+    delimiter = delimiter or "%s"
+    local result = {}
+    local i = 1
+    for str in string.gmatch(sourceString, "([^"..delimiter.."]+)") do
+        result[i] = str
+        i = i + 1
+    end
+    return result
+end
+
 local function BuildFullConfig(path)
 	local output = CONFIG_HEADER_ALL
 
@@ -115,28 +132,89 @@ local function BuildFullConfig(path)
 		ShowMessageImmediate("Building Config" .. "\n" .. sourcePath:sub(#MPV_DIR + 1) .. "\n" .. source)
 		for _, path in pairs(fs.ListItemsInDirectory(sourcePath)) do
 			if path:match(".conf") then
-				local index = path:match("([0-9]+)")
-				local indexNumber = tonumber(index)
-				if indexNumber then
-					if list[indexNumber + 1] then
-						QueueMessage(MESSAGES.SORT_DUPLICATION:format(path))
-					else
-						if indexNumber > 0 and not list[indexNumber] then
-							QueueMessage(MESSAGES.SORT_OUT_OF_ORDER)
+				local dashSplish = SplitString(path, "-")
+				
+				local index = ""
+				
+				if dashSplish[1]:match("([0-9]+)") == dashSplish[1] then
+					index = dashSplish[1]
+				end
+				
+				--[[ if this ever becomes asynchronous this will need to change
+				as we're depending on this being synchronous ]]
+				fs.OpenFile(sourcePath .. "/" .. path, fs.IO_MODE.READ, function(file)
+					local content = "# from: " .. path .. ":\n\n" .. file:read("*all")
+					local canBeActive = true
+
+					local metadata = CommentDataCodec.Parse(content)
+
+					if metadata.print == true then -- yes we leaving in debug code bc why not
+						PrintOutTableContent(metadata)
+					end
+					
+					if metadata.filter and type(metadata.filter) == "table" then
+						local allowedPlatforms = SplitString(metadata.filter.platform, ",")
+						local allowedDisplayServer = metadata.filter.display -- linux only
+
+						local platformMatches = false
+
+						for _, allowedPlatform in pairs(allowedPlatforms) do
+							local matches = false
+							
+							if allowedPlatform == "linux" then
+								if allowedDisplayServer then
+									if allowedDisplayServer == "wayland" then
+										matches = platform.platform == platform.PLATORMS.LINUX_WAYLAND
+									elseif allowedDisplayServer == "x11" then
+										matches = platform.platform == platform.PLATORMS.LINUX_X11
+									else
+										warn("unknown filter display server: " .. allowedDisplayServer)
+									end
+								else
+									matches = platform:IsInRange(platform.OS_RANGES.LINUX)
+								end
+							elseif allowedPlatform == "unix" then
+								matches = platform:IsInRange(platform.OS_RANGES.UNIX)
+							elseif allowedPlatform == "mac" then
+								matches = platform.platform == platform.PLATORMS.MAC
+							elseif allowedPlatform == "nt" then
+								matches = platform:IsInRange(platform.OS_RANGES.NT)
+							else
+								warn("unknown filter platform: " .. allowedPlatform)
+							end
+
+							if matches then
+								platformMatches = true
+								break
+							end
+						end
+
+						if not platformMatches then
+							canBeActive = false
 						end
 					end
-	
-					-- if this ever becomes async this will need to change
-					fs.OpenFile(sourcePath .. "/" .. path, fs.IO_MODE.READ, function(file)
-						list[indexNumber + 1] = "# from: " .. path .. ":\n\n" ..  file:read("*all")
-					end)
-				else
-					QueueMessage(MESSAGES.SORT_BAD_FORMAT)
-				end
+
+					if canBeActive then
+						table.insert(list, {
+							index = tonumber(index) or 0;
+							content = content;
+						})
+					end
+				end)
 			end
 		end
 
-		return table.concat(list, "\n\n")
+		table.sort(list, function(a, b)
+			return a.index < b.index
+		end)
+
+		local concattableList = {}
+
+		for _, item in pairs(list) do
+			table.insert(concattableList, item.content)
+		end
+
+		return table.concat(concattableList, "\n\n")
 	end
 
 	output = output .. "\n\n#builtin\n\n" .. CombineSource("builtin")
