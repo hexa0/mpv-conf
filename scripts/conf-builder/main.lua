@@ -8,7 +8,7 @@ local CONFIG_HEADER_01 = ([[
 # this file is being managed with conf-builder]])
 
 local CONFIG_HEADER_02 = ([[
- version 0.0.0 to improve git source control, DO NOT edit it!
+ version 0.1.0 to improve git source control, DO NOT edit it!
 # please edit the files in the conf folder instead of directly modifying this as it WILL be replaced on startup
 # files will get applied in the order specified before the name in the number, you cannot have more than one of the same number
 # use the "user" sub folder not "builtin", if you need to overwrite a default then set it on the user side]])
