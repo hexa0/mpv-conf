@@ -7,5 +7,7 @@ mpv.conf.bak
 input.conf.bak
 conf/*/user/*.conf
 conf/*/user/*.bak
+conf/script-opts/*/user/*.conf
+conf/script-opts/*/user/*.bak
 script-opts/*.conf
 script-opts/*.bak
