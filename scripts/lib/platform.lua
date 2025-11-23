@@ -27,14 +27,18 @@ platformCheck.PLATORMS = {
 platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC; do
 	if package.cpath:match(".dll") then -- Windows
 		platformCheck.platform = platformCheck.PLATORMS.WINDOWS
+		print("mpv is running on windows (" .. platformCheck.platform .. ")")
 	elseif package.cpath:match(".so") then -- Linux
 		if os.getenv('WAYLAND_DISPLAY') then
 			platformCheck.platform = platformCheck.PLATORMS.LINUX_WAYLAND
+			print("mpv is running on linux-wayland (" .. platformCheck.platform .. ")")
 		else
 			platformCheck.platform = platformCheck.PLATORMS.LINUX_X11
+			print("mpv is running on linux-x11 (" .. platformCheck.platform .. ")")
 		end
 	elseif package.cpath:match(".dylib") then -- Mac
 		platformCheck.platform = platformCheck.PLATORMS.MAC
+		print("mpv is running on mac (" .. platformCheck.platform .. ")")
 	end
 end
 

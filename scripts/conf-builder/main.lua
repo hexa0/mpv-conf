@@ -1,3 +1,5 @@
+package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..package.path
+
 local mp = require("mp")
 local fs = require("fs")
 local platform = require("platform")
