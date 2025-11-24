@@ -8,7 +8,7 @@ local fs = require("fs")
 
 local options = {
 	muted = false;
-	volume = 75;
+	volume = 74;
 }
 
 local OUT_PATH = ("%s/.volume.conf"):format(mp.get_script_directory())
