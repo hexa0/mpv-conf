@@ -1,12 +1,12 @@
-local platformCheck = {}
+local Platform = {}
 
-platformCheck.OS_RANGES = {
+Platform.OS_RANGES = {
 	NT = {0, 99};
 	UNIX = {100, 199};
 	LINUX = {110, 119};
 }
 
-platformCheck.PLATORMS = {
+Platform.PLATFORMS = {
 	-- NT 0 - 99
 	WINDOWS = 0;
 	-- WINDOWS7 = 1;
@@ -24,26 +24,34 @@ platformCheck.PLATORMS = {
 }
 
 -- an unknown OS will be assumed to be UNIX_GENERIC
-platformCheck.platform = platformCheck.PLATORMS.UNIX_GENERIC; do
+Platform.platform = Platform.PLATFORMS.UNIX_GENERIC; do
 	if package.cpath:match(".dll") then -- Windows
-		platformCheck.platform = platformCheck.PLATORMS.WINDOWS
-		print("mpv is running on windows (" .. platformCheck.platform .. ")")
+		Platform.platform = Platform.PLATFORMS.WINDOWS
 	elseif package.cpath:match(".so") then -- Linux
-		if os.getenv("WAYLAND_DISPLAY") then
-			platformCheck.platform = platformCheck.PLATORMS.LINUX_WAYLAND
-			print("mpv is running on linux-wayland (" .. platformCheck.platform .. ")")
-		else
-			platformCheck.platform = platformCheck.PLATORMS.LINUX_X11
-			print("mpv is running on linux-x11 (" .. platformCheck.platform .. ")")
+		if os.getenv("WAYLAND_DISPLAY") then -- Wayland
+			Platform.platform = Platform.PLATFORMS.LINUX_WAYLAND
+		else -- X11
+			Platform.platform = Platform.PLATFORMS.LINUX_X11
 		end
 	elseif package.cpath:match(".dylib") then -- Mac
-		platformCheck.platform = platformCheck.PLATORMS.MAC
-		print("mpv is running on mac (" .. platformCheck.platform .. ")")
+		Platform.platform = Platform.PLATFORMS.MAC
 	end
 end
 
-function platformCheck:IsInRange(range)
+function Platform:IsInRange(range)
 	return self.platform >= range[1] and self.platform <= range[2]
 end
 
-return platformCheck
+function Platform:GetInternalName(id)
+	for i, v in pairs(self.PLATFORMS) do
+		if v == id then
+			return i
+		end
+	end
+
+	return "UNKNOWN_PLATFORM_" .. id
+end
+
+-- print("mpv is running on " .. Platform:GetInternalName(Platform.platform))
+
+return Platform

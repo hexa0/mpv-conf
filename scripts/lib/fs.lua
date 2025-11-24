@@ -1,16 +1,14 @@
-package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..package.path
-
-local mp = require("mp")
-local platform = require("platform")
-
 local hfs = {}
+
+local Platform = require("platform")
+local EscapeShellArgument = require("escapeShellArgument")
 
 local DEBUG_MODE = false
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
 
-if platform:IsInRange(platform.OS_RANGES.NT) then
+if Platform:IsInRange(Platform.OS_RANGES.NT) then
 	MPV_DIR = "%appdata%\\mpv"
 	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
 end
@@ -26,7 +24,7 @@ hfs.IO_MODE = {
 }
 
 function hfs.FileExists(path)
-	if platform:IsInRange(platform.OS_RANGES.NT) then
+	if Platform:IsInRange(Platform.OS_RANGES.NT) then
 		path = path:gsub("\\", "/")
 		path = path:gsub("%%appdata%%", CONFIG_DIR .. "\\")
 	end
@@ -42,7 +40,7 @@ function hfs.FileExists(path)
 end
 
 function hfs.OpenFile(path, mode, compute)
-	if platform:IsInRange(platform.OS_RANGES.NT) then
+	if Platform:IsInRange(Platform.OS_RANGES.NT) then
 		path = path:gsub("\\", "/")
 		path = path:gsub("%%appdata%%", CONFIG_DIR .. "\\")
 	end
@@ -73,14 +71,6 @@ function hfs.OpenFile(path, mode, compute)
 	end
 end
 
-
--- probably unnecessary but it doesn't hurt having it!
-local function EscapeShellArgument(arg)
-	assert(type(arg) == "string", "must be a string")
-
-	return arg:gsub("([%\\\"$`])", "\\%1")
-end
-
 local function HasItem(table, item)
 	for _, v in pairs(table) do
 		if v == item then
@@ -107,7 +97,7 @@ local cachedIndex = {}
 function hfs.CacheFetch()
 	cachedIndex = {}
 
-	if platform:IsInRange(platform.OS_RANGES.NT) then
+	if Platform:IsInRange(Platform.OS_RANGES.NT) then
 		local command
 
 		command = ([[powershell -NoProfile -file "%s\index.ps1" "%s"]]):format(SCRIPT_DIR, MPV_DIR)
@@ -169,12 +159,12 @@ function hfs.ListItemsInDirectory(path)
 	if cachedIndex[cachePath] then
 		return cachedIndex[cachePath]
 	else
-		if platform:IsInRange(platform.OS_RANGES.NT) then
+		if Platform:IsInRange(Platform.OS_RANGES.NT) then
 			error("cache miss on " .. cachePath)
 		end
 	end
 	
-	if platform:IsInRange(platform.OS_RANGES.NT) then
+	if Platform:IsInRange(Platform.OS_RANGES.NT) then
 		local handle = io.popen(('dir "%s" /b'):format(EscapeShellArgument(path:gsub("\\", "/"))))
 		local lines = {}
 		for line in handle:lines() do
@@ -182,7 +172,7 @@ function hfs.ListItemsInDirectory(path)
 		end
 		handle:close()
 		return lines
-	elseif platform:IsInRange(platform.OS_RANGES.UNIX) then
+	elseif Platform:IsInRange(Platform.OS_RANGES.UNIX) then
 		-- on linux this isn't an issue since it doesn't load a whole terminal GUI like it does on windows
 		-- so we can safely skip caching it there!
 		local handle = io.popen(('ls -pa "%s" | grep -v \\\\./'):format(EscapeShellArgument(path)))
@@ -197,7 +187,7 @@ function hfs.ListItemsInDirectory(path)
 		handle:close()
 		return lines
 	else
-		error(("fs.ListItemsInDirectory(path: string) not implemented for OS %s"):format(platform.platform))
+		error(("fs.ListItemsInDirectory(path: string) not implemented for OS %s"):format(Platform:GetInternalName(Platform.platform)))
 	end
 end
 

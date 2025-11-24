@@ -24,6 +24,7 @@ additionally anything in `user` will always be applied after `builtin`
 * **k** | _Take a cropped screenshot_
 * **ctrl + c** | _Copies the current timestamp to the clipboard_
 * **ctrl + v** | _Attempts to open the file/url from the clipboard_
+* **ctrl + g** | _Attempts to seek to the copied timestamp on the clipboard_
 * **shift + 3** | _Switch audio track_
 * **ctrl + 3** | _Switch audio track merge mode_
 * **shift + m** | _Mocks the audio and makes it sound stupid because it's funny lmao_
@@ -53,8 +54,10 @@ Install the latest version of MPV and git from your package manager and run
 ```bash
 git clone https://github.com/hexa0/mpv-conf ~/.config/mpv
 ```
-if you're on wayland you'll need to install [wl-clipboard](https://github.com/bugaevc/wl-clipboard) to be able to copy timestamps<br/>
-on wayland,<br/>
-there are also additionally configs that will automatically be applied specifically on linux as well as wayland fixes to resolve various problems
+if you're on wayland you'll need to install [wl-clipboard](https://github.com/bugaevc/wl-clipboard) to be able to copy timestamps on wayland,<br/>
+or if you're on x11 you'll need to ensure that `xclip` is installed or else you will be unable to do copy/pasting on x11,<br/>
+additionally there are also configs that will automatically be applied specifically on linux as well as wayland fixes to resolve various problems<br/>
+however since i run wayland not x11 i have not tested these configs there,<br/>
+changes may need to be made for things to work smoothly
 # Installation (MacOS)
 i don't own a mac no clue, maybe try following some of the linux instructions?

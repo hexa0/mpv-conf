@@ -1,5 +1,6 @@
 scripts/sponsorblock_shared/sponsorblock.txt
 .volsave
+.volume.conf
 watch_later
 mpv.conf
 input.conf

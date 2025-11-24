@@ -1,30 +1,12 @@
 -- written by hexa0
--- fix for pasting paths & URLs into mpv on wayland (tested on kubuntu 25.10)
+-- supports for pasting in files and urls for multiple platforms
+-- some logic was re-used from here https://github.com/zenyd/mpv-scripts/blob/master/copy-paste-URL.lua
+
+package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..package.path
+
+local Clipboard = require("clipboard")
 
 local PLAYLIST_ACTION = "replace"
-
-local WAYLAND_CLIPBOARD_MPV_NATIVE_COMMAND = {
-    name = "subprocess";
-    args = {
-        "bash";
-        "--noprofile";
-        "-c";
-        "echo -n $(wl-paste)";
-    };
-    playback_only = false;
-    capture_stdout = true;
-    capture_stderr = true;
-}
-
-local function GetWaylandClipboard()
-    local clipboardProcess = mp.command_native(WAYLAND_CLIPBOARD_MPV_NATIVE_COMMAND)
-
-    if clipboardProcess.status < 0 then
-       error("wayland paste failed: " .. clipboardProcess.error_string .. "\n" .. clipboardProcess.stderr)
-    end
-
-    return clipboardProcess.stdout
-end
 
 local function Clamp(x, min, max)
     return (x < max and ((x > min and x) or min)) or max
@@ -47,6 +29,8 @@ end
 local function ValidateContentShouldBeLoadable(path)
     if ClampedSub(path, 1, 1) == "/" then
         return path -- unix file path
+    elseif ClampedSub(path, 2, 3) == ":\\" and ClampedSub(path, 1, 1):match("%a") then
+        return path -- nt file path
     elseif ClampedSub(path, 1, 7) == "http://" then
         return path -- http url
     elseif ClampedSub(path, 1, 8) == "https://" then
@@ -59,22 +43,21 @@ local function ValidateContentShouldBeLoadable(path)
     return nil
 end
 
-local function Paste()
-	local clipboardContent = GetWaylandClipboard()
+local function PasteMedia()
+	local clipboardContent = Clipboard.Get()
 
 	if #clipboardContent > 0 then
 		local validated = ValidateContentShouldBeLoadable(clipboardContent)
 
-		print(validated)
 		if validated then
 			mp.osd_message("Trying To Open URL/Path:\n" .. validated)
 			mp.commandv("loadfile", validated, PLAYLIST_ACTION)
 		else
-			mp.osd_message("Clipboard Is Invalid")
+			mp.osd_message("Clipboard Isn't Playable Media")
 		end
 	else
 		mp.osd_message("Clipboard Is Empty")
 	end
 end
 
-mp.add_key_binding(nil, "paste-url-wayland", Paste)
+mp.add_key_binding("Ctrl+v", "paste-media", PasteMedia)

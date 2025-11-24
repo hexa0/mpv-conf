@@ -47,10 +47,10 @@ local function ProcessStringLine(text)
 	return content .. suffix, isContinuation
 end
 
-function CommentDataCodec.Parse(content)
+function CommentDataCodec.Parse(content, rootName)
 	local result = {}
 	local stack = {result}
-	local inMetadata = false
+	local inRoot = false
 	
 	-- State for multiline strings
 	local inString = false
@@ -87,9 +87,9 @@ function CommentDataCodec.Parse(content)
 			else
 				local cleanLine = Trim(commentContent)
 				
-				if not inMetadata then
-					if cleanLine == "metadata" then
-						inMetadata = true
+				if not inRoot then
+					if cleanLine == rootName then
+						inRoot = true
 					end
 				else
 					if cleanLine == "end" then
@@ -126,6 +126,84 @@ function CommentDataCodec.Parse(content)
 	end
 
 	return result
+end
+
+function CommentDataCodec.Encode(data, rootName)
+	local lines = {}
+	-- Start the root block (e.g., # metadata)
+	table.insert(lines, "# " .. rootName)
+
+	local function Process(t)
+		-- Sort keys to ensure deterministic output (good for git diffs)
+		local keys = {}
+		for k in pairs(t) do
+			table.insert(keys, k)
+		end
+		table.sort(keys)
+
+		for _, k in ipairs(keys) do
+			local v = t[k]
+			
+			if type(v) == "table" then
+				-- Start nested table
+				table.insert(lines, "# " .. k)
+				Process(v)
+				table.insert(lines, "# end")
+			else
+				local valLines = {}
+				
+				if type(v) == "string" then
+					-- Split string by newlines manually to preserve empty lines correctly
+					local s = v
+					local rawLines = {}
+					local lastPos = 1
+					for i = 1, #s do
+						if s:sub(i, i) == "\n" then
+							table.insert(rawLines, s:sub(lastPos, i-1))
+							lastPos = i + 1
+						end
+					end
+					table.insert(rawLines, s:sub(lastPos))
+
+					for i, line in ipairs(rawLines) do
+						-- Double any existing trailing backslashes so the parser doesn't consume them
+						local backslashes = line:match("([\\]*)$") or ""
+						local escLine = line .. backslashes
+						
+						-- If this is not the last line, append a backslash to signal continuation
+						if i < #rawLines then
+							escLine = escLine .. "\\"
+						end
+						
+						table.insert(valLines, escLine)
+					end
+				else
+					-- Handle booleans and numbers
+					table.insert(valLines, tostring(v))
+				end
+
+				if #valLines > 0 then
+					-- First line: # key = value
+					table.insert(lines, "# " .. k .. " = " .. valLines[1])
+					
+					-- Subsequent lines: #value (no space after hash to strictly preserve content)
+					for i = 2, #valLines do
+						table.insert(lines, "#" .. valLines[i])
+					end
+				else
+					-- Empty string case
+					table.insert(lines, "# " .. k .. " = ")
+				end
+			end
+		end
+	end
+
+	Process(data)
+	
+	-- Close the root block
+	table.insert(lines, "# end")
+	
+	return table.concat(lines, "\n")
 end
 
 return CommentDataCodec

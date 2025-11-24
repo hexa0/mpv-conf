@@ -2,7 +2,7 @@ package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..pack
 
 local mp = require("mp")
 local fs = require("fs")
-local platform = require("platform")
+local Platform = require("platform")
 local CommentDataCodec = require("commentDataCodec")
 
 local CONFIG_HEADER_01 = ([[
@@ -32,7 +32,7 @@ local MESSAGE_TIME_LONG = 100
 local SCRIPT_DIR = mp.get_script_directory()
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
 
-if platform:IsInRange(platform.OS_RANGES.NT) then
+if Platform:IsInRange(Platform.OS_RANGES.NT) then
 	MPV_DIR = "%appdata%\\mpv"
 	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
 end
@@ -146,7 +146,7 @@ local function BuildFullConfig(path)
 					local content = "# from: " .. path .. ":\n\n" .. file:read("*all")
 					local canBeActive = true
 
-					local metadata = CommentDataCodec.Parse(content)
+					local metadata = CommentDataCodec.Parse(content, "metadata")
 
 					if metadata.print == true then -- yes we leaving in debug code bc why not
 						PrintOutTableContent(metadata)
@@ -164,21 +164,21 @@ local function BuildFullConfig(path)
 							if allowedPlatform == "linux" then
 								if allowedDisplayServer then
 									if allowedDisplayServer == "wayland" then
-										matches = platform.platform == platform.PLATORMS.LINUX_WAYLAND
+										matches = Platform.platform == Platform.PLATFORMS.LINUX_WAYLAND
 									elseif allowedDisplayServer == "x11" then
-										matches = platform.platform == platform.PLATORMS.LINUX_X11
+										matches = Platform.platform == Platform.PLATFORMS.LINUX_X11
 									else
 										warn("unknown filter display server: " .. allowedDisplayServer)
 									end
 								else
-									matches = platform:IsInRange(platform.OS_RANGES.LINUX)
+									matches = Platform:IsInRange(Platform.OS_RANGES.LINUX)
 								end
 							elseif allowedPlatform == "unix" then
-								matches = platform:IsInRange(platform.OS_RANGES.UNIX)
+								matches = Platform:IsInRange(Platform.OS_RANGES.UNIX)
 							elseif allowedPlatform == "mac" then
-								matches = platform.platform == platform.PLATORMS.MAC
+								matches = Platform.platform == Platform.PLATFORMS.MAC
 							elseif allowedPlatform == "nt" then
-								matches = platform:IsInRange(platform.OS_RANGES.NT)
+								matches = Platform:IsInRange(Platform.OS_RANGES.NT)
 							else
 								warn("unknown filter platform: " .. allowedPlatform)
 							end
@@ -266,7 +266,7 @@ local function Build()
 	end
 
 	if restartNeeded then
-		if platform:IsInRange(platform.OS_RANGES.NT) then
+		if Platform:IsInRange(Platform.OS_RANGES.NT) then
 			ShowMessageImmediate("Restarting")
 			local path = mp.get_property("path")
 			local timePosition = mp.get_property("time-pos")
@@ -284,7 +284,7 @@ local function Build()
 			end
 
 			os.exit()
-		elseif platform:IsInRange(platform.OS_RANGES.UNIX) then
+		elseif Platform:IsInRange(Platform.OS_RANGES.UNIX) then
 			ShowMessageImmediate("Restarting")
 			local path = mp.get_property("path")
 			local timePosition = mp.get_property("time-pos")
