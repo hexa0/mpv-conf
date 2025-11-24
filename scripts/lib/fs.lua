@@ -5,12 +5,12 @@ local EscapeShellArgument = require("escapeShellArgument")
 
 local DEBUG_MODE = false
 local SCRIPT_DIR = mp.get_script_directory()
-local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
+local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/confBuilder"))
 local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
 
 if Platform:IsInRange(Platform.OS_RANGES.NT) then
 	MPV_DIR = "%appdata%\\mpv"
-	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
+	SCRIPT_DIR = MPV_DIR .. "\\scripts\\confBuilder"
 end
 
 hfs.IO_MODE = {

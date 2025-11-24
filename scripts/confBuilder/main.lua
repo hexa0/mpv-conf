@@ -30,11 +30,11 @@ local MESSAGE_TIME = 5
 local MESSAGE_TIME_LONG = 100
 
 local SCRIPT_DIR = mp.get_script_directory()
-local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/conf-builder"))
+local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/confBuilder"))
 
 if Platform:IsInRange(Platform.OS_RANGES.NT) then
 	MPV_DIR = "%appdata%\\mpv"
-	SCRIPT_DIR = MPV_DIR .. "\\scripts\\conf-builder"
+	SCRIPT_DIR = MPV_DIR .. "\\scripts\\confBuilder"
 end
 
 local OUT_MPV = ("%s/mpv.conf"):format(MPV_DIR)
