@@ -23,7 +23,7 @@ local function Init()
 				options[k] = v
 			end
 
-			mp.set_property("volume", tonumber(options.volume))
+			mp.set_property("volume", options.volume)
 			mp.set_property_native("mute", options.muted)
 		end)
 	end
@@ -31,7 +31,7 @@ end
 
 local function Save()
 	fs.OpenFile(OUT_PATH, fs.IO_MODE.WRITE, function(file)
-		options.volume = tostring(mp.get_property("volume"))
+		options.volume = mp.get_property("volume")
 		options.muted = mp.get_property_native("mute")
 		file:write(CommentDataCodec.Encode(options, "root"))
 	end)
