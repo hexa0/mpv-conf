@@ -54,8 +54,8 @@ Install the latest version of MPV and git from your package manager and run
 ```bash
 git clone https://github.com/hexa0/mpv-conf ~/.config/mpv
 ```
-if you're on wayland you'll need to install [wl-clipboard](https://github.com/bugaevc/wl-clipboard) to be able to copy timestamps on wayland,<br/>
-or if you're on x11 you'll need to ensure that `xclip` is installed or else you will be unable to do copy/pasting on x11,<br/>
+if you're on wayland you'll need to install [wl-clipboard](https://github.com/bugaevc/wl-clipboard) to use clipboard related features,<br/>
+or if you're on x11 you'll need to ensure that `xclip` is installed or else you will be unable to use clipboard features,<br/>
 additionally there are also configs that will automatically be applied specifically on linux as well as wayland fixes to resolve various problems<br/>
 however since i run wayland not x11 i have not tested these configs there,<br/>
 changes may need to be made for things to work smoothly
