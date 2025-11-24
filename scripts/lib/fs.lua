@@ -4,13 +4,13 @@ local Platform = require("platform")
 local EscapeShellArgument = require("escapeShellArgument")
 
 local DEBUG_MODE = false
-local SCRIPT_DIR = mp.get_script_directory()
+local SCRIPT_DIR = debug.getinfo(1, "S").source:sub(2, -8)
 local MPV_DIR = SCRIPT_DIR:sub(1, #SCRIPT_DIR - #("/scripts/lib"))
 local CONFIG_DIR = MPV_DIR:sub(1, #MPV_DIR - #("/mpv"))
 
 if Platform:IsInRange(Platform.OS_RANGES.NT) then
 	MPV_DIR = "%appdata%\\mpv"
-	SCRIPT_DIR = MPV_DIR .. "\\scripts\\confBuilder"
+	SCRIPT_DIR = MPV_DIR .. "\\scripts\\lib"
 end
 
 hfs.IO_MODE = {
