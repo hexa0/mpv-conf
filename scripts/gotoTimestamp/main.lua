@@ -52,7 +52,6 @@ local function PasteTimestamp()
 	end
 
 	if #clipboardContent > 0 then
-		print(clipboardContent)
 		local validatedSeconds = ValidateContentAsTimestamp(clipboardContent)
 
 		if validatedSeconds then

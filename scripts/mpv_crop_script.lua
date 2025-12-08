@@ -1215,7 +1215,7 @@ end
 
 local SCRIPT_NAME = "mpv_crop_script"
 
-local SCRIPT_KEYBIND = "c"
+local SCRIPT_KEYBIND = "k"
 local SCRIPT_HANDLER = "crop-screenshot"
 
 --------------------

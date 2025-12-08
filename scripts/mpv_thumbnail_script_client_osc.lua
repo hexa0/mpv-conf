@@ -3328,7 +3328,7 @@ local function get_seek_fps()
 			for _, v in pairs(valid) do
 				avg = avg + (v/#valid)
 			end
-			print(1 / avg)
+			
 			return avg * 0.85
 		end
 	end

@@ -19,7 +19,8 @@ additionally anything in `user` will always be applied after `builtin`
 
 ## Keybinds:
 * **shift + home** | _Manually trigger conf-builder to rebuild the configs_
-* **c** | _Cycles between audio visaulizers (broken in windowed mode)_
+* **a** / **shift + A** | _Cycles forward/backwards through audio visaulizers (best used in fullscreen)_
+* **shift + C** | _Attempt to automatically crop out black borders_
 * **alt + o** | _Locates the current file_
 * **k** | _Take a cropped screenshot_
 * **ctrl + c** | _Copies the current timestamp to the clipboard_
@@ -27,7 +28,7 @@ additionally anything in `user` will always be applied after `builtin`
 * **ctrl + g** | _Attempts to seek to the copied timestamp on the clipboard_
 * **shift + 3** | _Switch audio track_
 * **ctrl + 3** | _Switch audio track merge mode_
-* **shift + m** | _Mocks the audio and makes it sound stupid because it's funny lmao_
+* **shift + M** | _Mocks the audio and makes it sound stupid because it's funny lmao_
 * **scroll wheel** | _Change volume by 2_
 
 # Installation (Windows)
