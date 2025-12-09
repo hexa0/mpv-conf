@@ -1,5 +1,5 @@
 -- written by hexa
--- saves the last used volume to ".volsave"
+-- saves the last used volume to ".volume.conf"
 
 package.path = mp.command_native({"expand-path", "~~/scripts/lib/?.lua;"})..package.path
 
