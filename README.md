@@ -13,7 +13,7 @@ in each folder there is two sub folders (`builtin` and `user`)<br/>
 edit the files in `user` then press shift + home to trigger a build<br/>
 alternatively if you don't have a full 100% keyboard you can delete the mpv.conf file and it will automatically retrigger on the next restart of mpv.<br/>
 FYI all config files will be combined together so anything not starting with a number will have the lowest priorirty,<br/>
-if your config needs to apply afer other configs to override them you will need to prefix it with a number e.g: "1-config.conf",<br/>
+if your config needs to apply after other configs to override them you will need to prefix it with a number e.g: "1-config.conf",<br/>
 by default everything without a number is treated as 0,<br/>
 additionally anything in `user` will always be applied after `builtin`
 
