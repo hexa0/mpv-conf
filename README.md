@@ -34,13 +34,19 @@ additionally anything in `user` will always be applied after `builtin`
 # Installation (Windows)
 First you'll need mpv itself, for that make sure to use [chocolatey](https://chocolatey.org/install) as it's the easiest installation method<br>
 ```bash
-choco install mpvio -a
+choco install mpvio.install -a
 ```
-if you've previously installed the outdated `mpv` package, then uninstall that with
+then to update run
+```bash
+choco upgrade mpvio.install -a
+```
+if you've previously installed the outdated `mpv` or `mpvio` package, then uninstall that with
 ```bash
 choco uninstall mpv -a
+# or
+choco uninstall mpvio -a
 ```
-that package states it isn't out of date but that's very wrong, it will break the titles of videos in the osc
+those packages state they aren't out of date but that's very wrong, please install the actually maintained `mpvio.install` package instead.
 
 then to install this config on windows, you'll need git, if you don't have it install it like this
 ```bash
