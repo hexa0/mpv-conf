@@ -1966,17 +1966,9 @@ function ASSCropper:update_mouse_position()
     -- These are real on-screen coords.
     self.mouse_screen.x, self.mouse_screen.y = mp.get_mouse_pos()
 
-    -- Clamp to screen edges to prevent a weird off by one error when manually attempting to select with fullscreen
-    if self.mouse_screen.x <= 1 then
-        self.mouse_screen.x = 0
-    end
-
+    -- Snap to screen edges to prevent a weird off by one error when selecting the bottom and right edges of the screen
     if self.mouse_screen.x >= display_state.screen.width - 1 then
         self.mouse_screen.x = display_state.screen.width
-    end
-
-    if self.mouse_screen.y <= 1 then
-        self.mouse_screen.y = 0
     end
 
     if self.mouse_screen.y >= display_state.screen.height - 1 then
