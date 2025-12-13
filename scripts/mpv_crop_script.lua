@@ -2914,6 +2914,11 @@ function script_crop_toggle()
     if asscropper.active then
         asscropper:stop_crop(true)
     else
+		if not mp.get_property_native("filename") or mp.get_property("video") == "no" then
+			mp.osd_message("No video to crop!", 2)
+			return
+		end
+
         local on_crop = function(crop)
             mp.set_osd_ass(0, 0, "")
             screenshot(crop)
