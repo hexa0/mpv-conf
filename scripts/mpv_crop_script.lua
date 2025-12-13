@@ -1592,11 +1592,14 @@ function ASSCropper.new(display_state)
         GROW_BOT     = { 0, 0, 0, 1 },
     }
 
-    self._key_binds           = {
+	self._key_binds_area = {
+		{ "mbtn_left_dbl",    function() end}, -- consume double clicks to prevent exiting fullscreen
         { "mouse_move",       function() self:update_mouse_position() end },
-        { "mouse_btn0",       function(e) self:on_mouse("mouse_btn0", e) end,       { complex = true } },
-        { "shift+mouse_btn0", function(e) self:on_mouse("mouse_btn0", e, true) end, { complex = true } },
+        { "mouse_btn0",       function() self:on_mouse("mouse_btn0", {event = "up"}) end, function() self:on_mouse("mouse_btn0", {event = "down"}) end},
+        { "shift+mouse_btn0", function() self:on_mouse("mouse_btn0", {event = "up"}, true) end, function() self:on_mouse("mouse_btn0", {event = "down"}, true) end},
+	}
 
+    self._key_binds           = {
         { "c",                function() self:key_event("CROSSHAIR") end },
         { "d",                function() self:key_event("CROP_DETECT") end },
         { "x",                function() self:key_event("GUIDES") end },
@@ -1634,11 +1637,16 @@ end
 
 function ASSCropper:enable_key_bindings()
     if not self._keys_bound then
-        for k, v in pairs(self._key_binds) do
+		for k, v in pairs(self._key_binds) do
             mp.add_forced_key_binding(unpack(v))
         end
-        -- Clear "allow-vo-dragging"
+
         mp.input_enable_section("input_forced_" .. mp.script_name)
+
+		mp.set_mouse_area(0, 0, display_state.screen.width, display_state.screen.height, "crop-mouse-area")
+		mp.set_key_bindings(self._key_binds_area, "crop-mouse-area", "force")
+		mp.enable_key_bindings("crop-mouse-area")
+
         self._keys_bound = true
     end
 end
@@ -1647,6 +1655,10 @@ function ASSCropper:disable_key_bindings()
     for k, v in pairs(self._key_binds) do
         mp.remove_key_binding(v[2]) -- remove by name
     end
+
+	mp.disable_key_bindings("crop-mouse-area")
+	mp.set_mouse_area(0, 0, 0, 0, "crop-mouse-area")
+
     self._keys_bound = false
 end
 
@@ -1936,6 +1948,7 @@ function ASSCropper:stop_crop(clear)
     self:stop_testing()
 
     self:disable_key_bindings()
+
     if clear then
         self.current_crop = nil
     end
@@ -1952,6 +1965,23 @@ end
 function ASSCropper:update_mouse_position()
     -- These are real on-screen coords.
     self.mouse_screen.x, self.mouse_screen.y = mp.get_mouse_pos()
+
+    -- Clamp to screen edges to prevent a weird off by one error when manually attempting to select with fullscreen
+    if self.mouse_screen.x <= 1 then
+        self.mouse_screen.x = 0
+    end
+
+    if self.mouse_screen.x >= display_state.screen.width - 1 then
+        self.mouse_screen.x = display_state.screen.width
+    end
+
+    if self.mouse_screen.y <= 1 then
+        self.mouse_screen.y = 0
+    end
+
+    if self.mouse_screen.y >= display_state.screen.height - 1 then
+        self.mouse_screen.y = display_state.screen.height
+    end
 
     if self.display_state:recalculate_bounds() and self.display_state.video_ready then
         -- These are on-video coords.
@@ -2097,8 +2127,9 @@ function ASSCropper:on_mouse(button, event, shift_down)
                 self.restrict_ratio = shift_down
             elseif self.dragging == 0 then
                 -- Check if we drag from a handle
-                local hitboxes = self:get_hitboxes()
-                local hit = self:hit_test(hitboxes, mouse_pos)
+
+				local hitboxes = self:get_hitboxes()
+				local hit = self:hit_test(hitboxes, mouse_pos)
 
                 self.dragging = hit
                 self.anchor_pos = self:_get_anchor_positions()[10 - hit]
@@ -2122,7 +2153,7 @@ function ASSCropper:on_mouse(button, event, shift_down)
                 end
             end
         else -- Mouse released
-            if xy_same(self.current_crop[1], self.current_crop[2]) and xy_distance(self.current_crop[1], mouse_pos) < 5 then
+			if xy_same(self.current_crop[1], self.current_crop[2]) and xy_distance(self.current_crop[1], mouse_pos) < 1 then
                 -- Mouse released after first click - ignore
             elseif self.dragging > 0 then
                 -- Adjust current crop
@@ -2983,6 +3014,16 @@ function expand_output_path(cropbox)
 end
 
 function screenshot(crop)
+    -- Default to a fullscreen screenshot if no crop box is provided
+    if not crop then
+        crop = {
+            w = display_state.screen.width;
+            h = display_state.screen.height;
+            x = 0;
+            y = 0;
+        }
+    end
+
     local size = round_dec(crop.w) .. "x" .. round_dec(crop.h)
 
     -- Bail on bad crop sizes
