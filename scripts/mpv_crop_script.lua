@@ -1518,13 +1518,7 @@ function ASSCropper.new(display_state)
 
     self.display_state = display_state
 
-    -- Replace tick timer with render timer
-    self.render_timer = mp.add_periodic_timer(1 / 60, function()
-        if self.active and display_state:recalculate_bounds() then
-            mp.set_osd_ass(display_state.screen.width, display_state.screen.height, self:get_render_ass())
-        end
-    end)
-    self.render_timer:stop()
+	self.observed_events = {}
 
     self.text_size            = 18
 
@@ -1908,12 +1902,44 @@ function ASSCropper:toggle_crop_detect()
     end
 end
 
+function ASSCropper:add_observed_event(event)
+	table.insert(self.observed_events, event)
+	return event
+end
+
+function ASSCropper:start_render()
+	mp.observe_property("mouse-pos", "native", self:add_observed_event(function() self:render() end))
+	mp.observe_property("touch-pos", "native", self:add_observed_event(function() self:render() end))
+	mp.observe_property("tablet-pos", "native", self:add_observed_event(function() self:render() end))
+	mp.observe_property("display-fps", "number", self:add_observed_event(function()
+		if self.render_timer then
+			self.render_timer:stop()
+			self.render_timer:kill()
+			self.render_timer = nil
+		end
+
+		self.render_timer = mp.add_periodic_timer(1 / mp.get_property_number("display-fps"), function() self:render() end)
+	end))
+end
+
+function ASSCropper:stop_render()
+	for _, event in pairs(self.observed_events) do
+		mp.unobserve_property(event)
+	end
+
+	if self.render_timer then
+		self.render_timer:stop()
+		self.render_timer:kill()
+		self.render_timer = nil
+	end
+end
+
 function ASSCropper:start_crop(options, on_crop, on_cancel)
     -- Refresh display state
     self.display_state:recalculate_bounds(true)
     if self.display_state.video_ready then
         self.active = true
-        self.render_timer:resume()
+		self:start_render()
 
         self.options = {}
 
@@ -1941,7 +1967,7 @@ end
 -- Update stop_crop method
 function ASSCropper:stop_crop(clear)
     self.active = false
-    self.render_timer:stop()
+	self:stop_render()
 
     self:cropdetect_stop()
     self:blackframe_stop()
@@ -1951,14 +1977,6 @@ function ASSCropper:stop_crop(clear)
 
     if clear then
         self.current_crop = nil
-    end
-end
-
-function ASSCropper:on_tick()
-    -- Unused, for debugging
-    if self.active then
-        self.display_state:recalculate_bounds()
-        self:render()
     end
 end
 
@@ -2396,11 +2414,10 @@ function order_pair(a, b)
 end
 
 function ASSCropper:render()
-    -- For debugging
-    local ass_txt = self:get_render_ass()
-
-    local ds = self.display_state
-    mp.set_osd_ass(ds.screen.width, ds.screen.height, ass_txt)
+	if self.active and display_state:recalculate_bounds() then
+		local ds = self.display_state
+		mp.set_osd_ass(ds.screen.width, ds.screen.height, self:get_render_ass())
+	end
 end
 
 function ASSCropper:get_render_ass(dim_only)
@@ -2938,17 +2955,6 @@ function script_crop_toggle()
         if not asscropper.active then
             mp.osd_message("No video to crop!", 2)
         end
-    end
-end
-
-local next_tick_time = nil
-function on_tick_listener()
-    local now = mp.get_time()
-    if next_tick_time == nil or now >= next_tick_time then
-        if asscropper.active and display_state:recalculate_bounds() then
-            mp.set_osd_ass(display_state.screen.width, display_state.screen.height, asscropper:get_render_ass())
-        end
-        next_tick_time = now + (1 / 60)
     end
 end
 
