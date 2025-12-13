@@ -1669,9 +1669,6 @@ local state = {
     message_text,
     message_hide_timer,
     fullscreen = false,
-    tick_timer = nil,
-    tick_last_time = 0,                     -- when the last tick() was run
-    hide_timer = nil,
     cache_state = nil,
     idle = false,
     enabled = true,
@@ -1688,7 +1685,6 @@ local state = {
 }
 
 local window_control_box_width = 80
-local tick_delay = 0.03
 
 local is_december = os.date("*t").month == 12
 
@@ -2512,13 +2508,12 @@ function show_message(text, duration)
 
     state.message_text = mp.command_native({"escape-ass", text})
 
-    if not state.message_hide_timer then
-        state.message_hide_timer = mp.add_timeout(0, request_tick)
+	if not state.message_hide_timer then
+        state.message_hide_timer = mp.add_timeout(0, function() end)
     end
     state.message_hide_timer:kill()
     state.message_hide_timer.timeout = duration
     state.message_hide_timer:resume()
-    request_tick()
 end
 
 function render_message(ass)
@@ -3285,7 +3280,6 @@ end
 
 function update_options(list)
     validate_user_opts()
-    request_tick()
     visibility_mode(user_opts.visibility, true)
     update_duration_watch()
     request_init()
@@ -3847,7 +3841,6 @@ function hide_osc()
     elseif user_opts.fadeduration > 0 then
         if state.osc_visible then
             state.anitype = "out"
-            request_tick()
         end
     else
         osc_visible(false)
@@ -3859,36 +3852,14 @@ function osc_visible(visible)
         state.osc_visible = visible
         update_margins()
     end
-    request_tick()
 end
 
 function pause_state(name, enabled)
     state.paused = enabled
-    request_tick()
 end
 
 function cache_state(name, st)
     state.cache_state = st
-    request_tick()
-end
-
--- Request that tick() is called (which typically re-renders the OSC).
--- The tick is then either executed immediately, or rate-limited if it was
--- called a small time ago.
-function request_tick()
-    if state.tick_timer == nil then
-        state.tick_timer = mp.add_timeout(0, tick)
-    end
-
-    if not state.tick_timer:is_enabled() then
-        local now = mp.get_time()
-        local timeout = tick_delay - (now - state.tick_last_time)
-        if timeout < 0 then
-            timeout = 0
-        end
-        state.tick_timer.timeout = timeout
-        state.tick_timer:resume()
-    end
 end
 
 function mouse_leave()
@@ -3902,16 +3873,11 @@ end
 
 function request_init()
     state.initREQ = true
-    request_tick()
 end
 
 -- Like request_init(), but also request an immediate update
 function request_init_resize()
     request_init()
-    -- ensure immediate update
-    state.tick_timer:kill()
-    state.tick_timer.timeout = 0
-    state.tick_timer:resume()
 end
 
 function render_wipe()
@@ -3943,7 +3909,6 @@ function render()
         -- get ignored. that's because osc_init() recreates the osc elements,
         -- but mouse handling depends on the elements staying unmodified
         -- between mouse-down and mouse-up (using the index active_element).
-        request_tick()
     elseif state.initREQ then
         osc_init()
         state.initREQ = false
@@ -4068,16 +4033,6 @@ function render()
             if state.active_element == nil and not mouse_over_osc then
                 hide_osc()
             end
-        else
-            -- the timer is only used to recheck the state and to possibly run
-            -- the code above again
-            if not state.hide_timer then
-                state.hide_timer = mp.add_timeout(0, tick)
-            end
-            state.hide_timer.timeout = timeout
-            -- re-arm
-            state.hide_timer:kill()
-            state.hide_timer:resume()
         end
     end
 
@@ -4185,9 +4140,6 @@ function process_event(source, what)
             elements[n].eventresponder[action](elements[n])
         end
     end
-
-    -- ensure rendering after any (mouse) event - icons could change etc
-    request_tick()
 end
 
 
@@ -4216,8 +4168,7 @@ local santa_hat_lines = {
     "{\\c&HF8F8F8&\\p6}m 626 -191 b 565 -155 486 -196 428 -151 387 -115 327 -101 304 -47 273 2 267 59 249 113 219 157 217 213 215 265 217 309 260 302 285 283 373 264 465 264 555 257 608 252 655 292 709 287 759 294 816 276 863 298 903 340 972 324 1012 367 1061 394 1125 382 1167 424 1213 462 1268 482 1322 506 1385 546 1427 610 1479 662 1510 690 1534 725 1566 752 1611 796 1664 830 1703 880 1740 918 1747 986 1805 1005 1863 991 1897 932 1916 880 1914 823 1945 777 1961 725 1979 673 1957 622 1938 575 1912 534 1862 515 1836 473 1790 417 1755 351 1697 305 1658 266 1633 216 1593 176 1574 138 1539 116 1497 110 1448 101 1402 77 1371 37 1346 -16 1295 15 1254 6 1211 -27 1170 -62 1121 -86 1072 -104 1027 -128 976 -133 914 -130 851 -137 794 -162 740 -181 679 -168 626 -191 m 2051 917 b 1971 932 1929 1017 1919 1091 1912 1149 1923 1214 1970 1254 2000 1279 2027 1314 2066 1325 2139 1338 2212 1295 2254 1238 2281 1203 2287 1158 2282 1116 2292 1061 2273 1006 2229 970 2206 941 2167 938 2138 918{\\p0}",
 }
 
--- called by mpv on every frame
-function tick()
+function rendertick()
     if state.marginsREQ == true then
         update_margins()
         state.marginsREQ = false
@@ -4281,8 +4232,6 @@ function tick()
         render_wipe()
     end
 
-    state.tick_last_time = mp.get_time()
-
     if state.anitype ~= nil then
         -- state.anistart can be nil - animation should now start, or it can
         -- be a timestamp when it started. state.idle has no animation.
@@ -4290,12 +4239,25 @@ function tick()
            (not state.anistart or
             mp.get_time() < 1 + state.anistart + user_opts.fadeduration/1000)
         then
-            -- animating or starting, or still within 1s past the deadline
-            request_tick()
+
         else
             kill_animation()
         end
     end
+end
+
+do
+	local render_timer
+
+	mp.observe_property("display-fps", "number", function()
+		if render_timer then
+			render_timer:stop()
+			render_timer:kill()
+			render_timer = nil
+		end
+
+		render_timer = mp.add_periodic_timer(1 / mp.get_property_number("display-fps"), function() rendertick() end)
+	end)
 end
 
 function do_enable_keybindings()
@@ -4417,17 +4379,10 @@ mp.observe_property("window-maximized", "bool",
 mp.observe_property("idle-active", "bool",
     function(name, val)
         state.idle = val
-        request_tick()
     end
 )
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
-mp.observe_property("vo-configured", "bool", function(name, val)
-    request_tick()
-end)
-mp.observe_property("playback-time", "number", function(name, val)
-    request_tick()
-end)
 mp.observe_property("osd-dimensions", "native", function(name, val)
     -- (we could use the value instead of re-querying it all the time, but then
     --  we might have to worry about property update ordering)
@@ -4528,7 +4483,6 @@ function visibility_mode(mode, no_osd)
     state.input_enabled = false
 
     update_margins()
-    request_tick()
 end
 
 function idlescreen_visibility(mode, no_osd)
@@ -4551,8 +4505,6 @@ function idlescreen_visibility(mode, no_osd)
     if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
         mp.osd_message("OSC logo visibility: " .. tostring(mode))
     end
-
-    request_tick()
 end
 
 visibility_mode(user_opts.visibility, true)
