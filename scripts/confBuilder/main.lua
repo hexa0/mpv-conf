@@ -312,4 +312,4 @@ mp.add_timeout(0.2, function()
 end)
 
 mp.add_key_binding("Shift+HOME", "build-conf", Build)
-mp.add_key_binding("KP_HOME", "build-conf", Build)
+mp.add_key_binding("Shift+KP_HOME", "build-conf", Build)
